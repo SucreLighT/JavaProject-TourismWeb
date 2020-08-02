@@ -54,7 +54,7 @@
             }
 
             function checkName() {
-                if ($("#name").val() != "") {
+                if ($("#name").val() !== "") {
                     $("#name").css("border", "");
                 } else {
                     $("#name").css("border", "1px solid red");
@@ -76,7 +76,7 @@
             }
 
             function checkBirthday() {
-                if ($("#birthday").val() != "") {
+                if ($("#birthday").val() !== "") {
                     $("#birthday").css("border", "");
                 } else {
                     $("#birthday").css("border", "1px solid red");
@@ -84,7 +84,7 @@
             }
 
             function checkCheck() {
-                if ($("#check").val() != "") {
+                if ($("#check").val() !== "") {
                     $("#check").css("border", "");
                 } else {
                     $("#check").css("border", "1px solid red");
@@ -92,9 +92,25 @@
             }
 
             $(function () {
-                //当表单提交时调用校验函数
                 $("#registerForm").submit(function () {
-                    checkUsername() && checkPassword() && checkEmail();
+                    //1.发送数据到服务器
+                    if (checkUsername() && checkPassword() && checkEmail()) {
+                        //校验通过,发送ajax请求，提交表单的数据
+                        $.post("registUserServlet", $("#registerForm").serialize(), function (data) {
+                            //处理服务器响应的数据data  {flag:true,errorMsg:"注册失败"}
+                            if (data.flag) {
+                                //注册成功，跳转成功页面
+                                location.href = "register_ok.html";
+                            } else {
+                                //注册失败,给errorMsg添加提示信息
+                                $("#errorMsg").html(data.errorMsg);
+                            }
+                        });
+
+                    }
+                    //2.不让页面跳转
+                    return false;
+                    //如果这个方法没有返回值，或者返回为true，则表单提交，如果返回为false，则表单不提交
                 });
 
                 //当一个输入框失去焦点时校验表单
