@@ -21,6 +21,13 @@
 
 使用sql脚本完成数据库表的建立
 
+## 主要实体类结构
+
+|                            User类                            |                         ResultInfo类                         |      |      |      |      |      |
+| :----------------------------------------------------------: | :----------------------------------------------------------: | :--: | :--: | :--: | :--- | :--- |
+| private int uid;//用户id<br/>    private String username;//用户名，账号<br/>    private String password;//密码<br/>    private String name;//真实姓名<br/>    private String birthday;//出生日期<br/>    private String sex;//男或女<br/>    private String telephone;//手机号<br/>    private String email;//邮箱<br/>    private String status;//激活状态，Y代表激活，N代表未激活<br/>    private String code;//激活码（要求唯一） | private boolean flag;//后端返回结果正常为true，发生异常返回false<br/>    private Object data;//后端返回结果数据对象<br/>    private String errorMsg;//发生异常的错误消息 |      |      |      |      |      |
+|                                                              |                                                              |      |      |      |      |      |
+
 
 
 ## 用户注册功能
@@ -33,7 +40,7 @@
 
 
 
-1. 在register.html中编写js代码进行表单校验
+1. 在register.html中编写js代码进行表单校验，在点击提交按钮或是某一输入框失去焦点时触发对应事件。
    1. 用户名：单词字符，8-20位；
    2. 密码：单词字符，8-20位；
    3. email：邮件格式；
@@ -41,8 +48,7 @@
    5. 手机号：手机号格式；
    6. 出生日期：非空；
    7. 验证码：非空
-
-
+2. 
 
 
 
