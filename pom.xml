@@ -25,7 +25,8 @@
         <dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
-            <version>6.0.6</version>
+            <version>8.0.21</version>
+            <scope>compile</scope>
         </dependency>
 
         <!--Junit-->
@@ -54,15 +55,16 @@
         <dependency>
             <groupId>commons-beanutils</groupId>
             <artifactId>commons-beanutils</artifactId>
-            <version>1.9.3</version>
+            <version>1.9.4</version>
             <scope>compile</scope>
         </dependency>
+
 
         <!--jackson-->
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
-            <version>2.3.3</version>
+            <version>2.9.10.5</version>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
@@ -76,10 +78,11 @@
         </dependency>
 
         <!--jdbcTemplate-->
+
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-core</artifactId>
-            <version>4.1.2.RELEASE</version>
+            <version>4.3.27.RELEASE</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
