@@ -19,4 +19,20 @@ public interface UserDao {
      * @function 保存用户信息
      */
     public void save(User user);
+
+    /**
+     * @param code
+     * @return User
+     * @author sucre
+     * @function 根据用户激活码查找用户
+     */
+    public User findByCode(String code);
+
+    /**
+     * @author sucre
+     * @function 更新用户状态
+     * @param user
+     * @return void
+     */
+    public void updateStatus(User user);
 }

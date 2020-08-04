@@ -11,4 +11,14 @@ public interface UserService {
      * @function 注册用户
      */
     public boolean regist(User user);
+
+
+    /**
+     * @param code
+     * @return boolean
+     * @author sucre
+     * @function 根据激活码激活用户
+     */
+    public boolean activate(String code);
+
 }
