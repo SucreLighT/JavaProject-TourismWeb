@@ -8,7 +8,7 @@ import cn.sucre.util.MailUtils;
 import cn.sucre.util.UuidUtil;
 
 /**
- * @description: UserServive实现类
+ * @description: UserService实现类
  * @author: sucre
  * @date: 2020/07/30
  * @time: 14:20
@@ -51,5 +51,10 @@ public class UserServiceImpl implements UserService {
         }else{
             return false;
         }
+    }
+
+    @Override
+    public User login(User user) {
+        return userDao.findByUsernameAndPassword(user.getUsername(),user.getPassword());
     }
 }

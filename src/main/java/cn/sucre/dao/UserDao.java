@@ -29,10 +29,18 @@ public interface UserDao {
     public User findByCode(String code);
 
     /**
-     * @author sucre
-     * @function 更新用户状态
      * @param user
      * @return void
+     * @author sucre
+     * @function 更新用户状态
      */
     public void updateStatus(User user);
+
+    /**
+     * @param username，password
+     * @return User
+     * @author sucre
+     * @function 根据用户名和密码查询用户对象
+     */
+    User findByUsernameAndPassword(String username, String password);
 }

@@ -21,4 +21,11 @@ public interface UserService {
      */
     public boolean activate(String code);
 
+    /**
+     * @param user
+     * @return User
+     * @author sucre
+     * @function 登录用户
+     */
+    User login(User user);
 }
