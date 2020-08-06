@@ -3,7 +3,7 @@
 ## 技术选型
 - [x] Web层
   - [ ] Servlet：前端控制器
-  - [ ] html：视图
+  - [ ] Html：视图
   - [ ] Filter：过滤器
   - [ ] BeanUtils：数据封装
   - [ ] Jackson：json序列化工具
@@ -32,7 +32,9 @@
 
 
 
-## 用户注册功能
+## 用户模块
+
+### 用户注册功能
 
 |   架构   |                             前端                             |                          Servlet层                           |                          Service层                           |                            Dao层                             |
 | :------: | :----------------------------------------------------------: | :----------------------------------------------------------: | :----------------------------------------------------------: | :----------------------------------------------------------: |
@@ -48,27 +50,21 @@
   6. `checkBirthday()校验`出生日期：非空；
   7. `checkCheck()`校验验证码：非空
 
-
-
-## 邮件激活功能
+### 邮件激活功能
 
 |   架构   |                             前端                             |                          Servlet层                           |                          Service层                           |                            Dao层                             |
 | :------: | :----------------------------------------------------------: | :----------------------------------------------------------: | :----------------------------------------------------------: | :----------------------------------------------------------: |
 |   文件   |      register_ok.html发送邮件给用户，邮件中附带激活链接      |                     ActivateUserServlet                      |                         UserService                          |                           UserDao                            |
 | 功能说明 | 点击激活该用户，跳转到相关的ActivateUserServlet，并带有参数code，表示对应激活码（唯一标识） | 1. 获取激活码<br />2. 如果激活码不为空，使用service方法进行结果，根据返回值判断是否激活成功并显示相应的信息激活码查询对应的User对象 | activate()调用dao层进行对象的激活，首先根据激活码code查询是否存在该用户，若存在则更新该用户状态为激活，不存在则直接返回false | 1. findByCode()根据用户的激活码查询用户，返回查询结果user对象<br />2. updateStatus()更新用户状态status = 'Y'为激活 |
 
-
-
-## 用户登录功能
+### 用户登录功能
 
 |   架构   |                             前端                             |                          Servlet层                           |          Service层           |                        Dao层                        |
 | :------: | :----------------------------------------------------------: | :----------------------------------------------------------: | :--------------------------: | :-------------------------------------------------: |
 |   文件   |                          login.html                          |                         LoginServlet                         |         UserService          |                       UserDao                       |
 | 功能说明 | 1. 设置登录按钮单击事件<br />2. 异步发送ajax请求，提交数据到LoginServlet，根据返回信息判断是否登录成功<br />3. 登录成功则跳转到index.html界面，否则显示错误提示 | 1. 获取用户信息，使用BeanUtils进行封装<br />2. 调用service中的方法查询user<br/>3. 根据查询返回的user对象，判断该用户是否存在以及是否激活，并保存对应的信息到info对象中<br />4. 如果用户存在且激活，则登录成功，需要**将该用户对象写入session中**<br />5. 使用json将info对象序列化并发送给前端 | login()调用dao层进行用户登录 | findByUsernameAndPassword()根据用户名和密码进行登录 |
 
-
-
-## 显示用户登录状态和登出功能
+### 显示用户登录状态和登出功能
 
 |   架构   |                             前端                             |                          Servlet层                           |
 | :------: | :----------------------------------------------------------: | :----------------------------------------------------------: |
@@ -77,15 +73,100 @@
 
 
 
+## 优化Servlet :star::star::star:
 
+在开发过程中，完成一个模块时，如用户模块，会产生多个Servlet（注册，登录，登出等），为了减少Servlet文件的数量，将多个Servlet中的功能全部抽象为对应的方法，集合到一个Servlet中。
 
+![image-20200806163354404](D:\Java\workplace\JavaProject\README.assets\image-20200806163354404.png)
 
+如图所示：BaseServlet用于实现方法的分发，关于用户的操作，将方法全部写在UserServlet中。
 
+### BaseServlet
 
+重写HttpServlet中的service()方法，用于实现方法的分发。
 
+1. 通过获取URI，如：`/project/user/login`；
+2. 使用字符串方法获取URI中最后的方法名，如`login`；
+3. 使用反射机制获取对应的方法，如：`UserServlet.login()`;
+4. 使用`invoke()`执行方法。
 
+```java
+@Override
+protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    //完成方法分发
+    //1.获取请求路径
+    String uri = req.getRequestURI();
+    //2.获取方法名称
+    String methodName = uri.substring(uri.lastIndexOf('/') + 1);
+    //3.获取方法对象
+    try {
+        Method method = this.getClass().getMethod(methodName, HttpServletRequest.class, HttpServletResponse.class);
+        //4.执行方法
+        method.invoke(this, req, resp);
+    } catch (NoSuchMethodException e) {
+        e.printStackTrace();
+    } catch (IllegalAccessException e) {
+        e.printStackTrace();
+    } catch (InvocationTargetException e) {
+        e.printStackTrace();
+    }
+}
+```
 
+### UserServlet
 
+1. 将之前实现各自功能的Servlet全部抽象成一个方法，如：`LoginServlet ->login()`，写入得到UserServlet中；
+2. 需要将这些方法的修饰符从默认的`protected`修改为`public`。因为在BaseServlet中调用`getMethod()`执行对应方法，获取的是public方法，包括继承的方法，如果使用`getDeclaredMethods()`，可以取得所有自己声明的方法,包括 `public protected default private`。
+3. 一些方法中多次定义使用的变量，如`UserService`，可以声明为UserServlet的成员变量。
+4. UserServlet的请求路径修改为`/User/*`，代表User下的所有方法都会请求该Servlet，然后根据方法名，调用父类BaseServlet中的`service()`进行方法的分发执行。
+
+```java
+@WebServlet(urlPatterns = "/User/*")
+public class UserServlet extends BaseServlet {
+    private UserService userService = new UserServiceImpl();
+    /**
+     * 登录功能
+     * @param request
+     * @param response
+     * @throws ServletException
+     * @throws IOException
+     */
+    public void login(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        Map<String, String[]> map = request.getParameterMap();
+        User user = new User();
+        try {
+            BeanUtils.populate(user, map);
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        } catch (InvocationTargetException e) {
+            e.printStackTrace();
+        }
+        // UserService service = new UserServiceImpl();
+        User u = userService.login(user);
+        
+        ResultInfo info = new ResultInfo();
+        if (u == null) {
+            info.setFlag(false);
+            info.setErrorMsg("用户名或密码错误！");
+        }
+        if (u != null && !"Y".equals(u.getStatus())) {
+            info.setFlag(false);
+            info.setErrorMsg("您尚未激活，清先激活！");
+        }
+        if (u != null && "Y".equals(u.getStatus())) {
+            request.getSession().setAttribute("user", u);
+            info.setFlag(true);
+        }
+        ObjectMapper mapper = new ObjectMapper();
+        response.setContentType("application/json; charset=UTF-8");
+        mapper.writeValue(response.getOutputStream(), info);
+    }
+}
+```
+
+### 修改相关路径
+
+最后还需要在请求Servlet的地方将原来的路径修改为新的路径，如：`/LoginServlet ->/User/login`。
 
 
 
