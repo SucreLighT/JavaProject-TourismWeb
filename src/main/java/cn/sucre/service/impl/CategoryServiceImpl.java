@@ -6,6 +6,7 @@ import cn.sucre.domain.Category;
 import cn.sucre.service.CategoryService;
 import cn.sucre.util.JedisUtil;
 import redis.clients.jedis.Jedis;
+import redis.clients.jedis.Tuple;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,24 +26,28 @@ public class CategoryServiceImpl implements CategoryService {
         //1.获取Jedis客户端
         Jedis jedis = JedisUtil.getJedis();
         //2.使用sortedset作为数据结构，key为category，0到-1表示所有
-        Set<String> redisCategories = jedis.zrange("category", 0, -1);
+        Set<Tuple> redisCategories = jedis.zrangeWithScores("category", 0, -1);
 
         List<Category> categories = null;
 
         //3.判断redis缓存中的集合是否为空
         if (redisCategories == null || redisCategories.size() == 0) {
-            //如果缓存中为空，从数据库中查询，并将结果写入缓存
+            //如果缓存中为空，从数据库中查询，
+            System.out.println("从数据库中查询...");
             categories = categoryDao.findAll();
+
             for (int i = 0; i < categories.size(); i++) {
                 jedis.zadd("category", categories.get(i).getCid(), categories.get(i).getCname());
             }
         } else {
             //4.如果不为空,将set的数据存入list
+            System.out.println("从缓存中中查询...");
             categories = new ArrayList<Category>();
-            for (String name : redisCategories
+            for (Tuple tuple : redisCategories
             ) {
                 Category category = new Category();
-                category.setCname(name);
+                category.setCname(tuple.getElement());
+                category.setCid((int) tuple.getScore());
                 categories.add(category);
             }
         }
