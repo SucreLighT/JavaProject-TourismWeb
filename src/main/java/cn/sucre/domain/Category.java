@@ -7,8 +7,8 @@ package cn.sucre.domain;
  * @time: 15:53
  */
 public class Category {
-    private int cid;//分类id
-    private String cname;//分类名称
+    private int cid;
+    private String cname;
 
     public Category() {
     }
