@@ -11,7 +11,6 @@ public class ResultInfo {
     private Object data;
     private String errorMsg;
 
-    //无参构造方法
     public ResultInfo() {
     }
     public ResultInfo(boolean flag) {
