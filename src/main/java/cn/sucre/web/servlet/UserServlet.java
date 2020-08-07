@@ -83,8 +83,10 @@ public class UserServlet extends BaseServlet {
         }
 
         // 将info对象序列化为json
-        ObjectMapper mapper = new ObjectMapper();
-        String json = mapper.writeValueAsString(info);
+        // ObjectMapper mapper = new ObjectMapper();
+        // String json = mapper.writeValueAsString(info);
+
+        String json = writeValueAsString(info);
 
         // 将json数据写回客户端并设置content-type
         response.setContentType("application/json;charset=utf-8");
@@ -128,9 +130,10 @@ public class UserServlet extends BaseServlet {
             info.setFlag(true);
         }
 
-        ObjectMapper mapper = new ObjectMapper();
-        response.setContentType("application/json; charset=UTF-8");
-        mapper.writeValue(response.getOutputStream(), info);
+        writeValue(info, response);
+        // ObjectMapper mapper = new ObjectMapper();
+        // response.setContentType("application/json; charset=UTF-8");
+        // mapper.writeValue(response.getOutputStream(), info);
     }
 
     /**
@@ -145,9 +148,10 @@ public class UserServlet extends BaseServlet {
         //从session中获取登录用户
         Object user = request.getSession().getAttribute("user");
 
-        ObjectMapper mapper = new ObjectMapper();
-        response.setContentType("application/json;charset=utf-8");
-        mapper.writeValue(response.getOutputStream(), user);
+        writeValue(user, response);
+        // ObjectMapper mapper = new ObjectMapper();
+        // response.setContentType("application/json;charset=utf-8");
+        // mapper.writeValue(response.getOutputStream(), user);
     }
 
     /**
@@ -192,5 +196,4 @@ public class UserServlet extends BaseServlet {
             response.getWriter().write(msg);
         }
     }
-
 }

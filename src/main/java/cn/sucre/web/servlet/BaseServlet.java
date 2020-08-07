@@ -1,5 +1,8 @@
 package cn.sucre.web.servlet;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -39,6 +42,30 @@ public class BaseServlet extends HttpServlet {
         } catch (InvocationTargetException e) {
             e.printStackTrace();
         }
-
     }
+
+
+    /**
+     * 封装序列化json的方法：直接将传入对象序列化为字节流并写回客户端
+     * @param obj
+     * @param response
+     * @throws IOException
+     */
+    public void writeValue(Object obj, HttpServletResponse response) throws IOException {
+        ObjectMapper mapper = new ObjectMapper();
+        response.setContentType("application/json; charset=UTF-8");
+        mapper.writeValue(response.getOutputStream(), obj);
+    }
+
+    /**
+     * 封装序列化json的方法：将对象序列化成字符并返回
+     * @param obj
+     * @return
+     * @throws JsonProcessingException
+     */
+    public String writeValueAsString(Object obj) throws JsonProcessingException {
+        ObjectMapper mapper = new ObjectMapper();
+        return mapper.writeValueAsString(obj);
+    }
+
 }
