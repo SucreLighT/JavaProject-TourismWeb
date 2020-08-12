@@ -1,9 +1,15 @@
 package cn.sucre.service.impl;
 
 import cn.sucre.dao.RouteDao;
+import cn.sucre.dao.RouteImgDao;
+import cn.sucre.dao.SellerDao;
 import cn.sucre.dao.impl.RouteDaoImpl;
+import cn.sucre.dao.impl.RouteImgDaoImpl;
+import cn.sucre.dao.impl.SellerDaoImpl;
 import cn.sucre.domain.PageBean;
 import cn.sucre.domain.Route;
+import cn.sucre.domain.RouteImg;
+import cn.sucre.domain.Seller;
 import cn.sucre.service.RouteService;
 
 import java.util.List;
@@ -16,6 +22,8 @@ import java.util.List;
  */
 public class RouteServiceImpl implements RouteService {
     private RouteDao routeDao = new RouteDaoImpl();
+    private RouteImgDao routeImgDao = new RouteImgDaoImpl();
+    private SellerDao sellerDao = new SellerDaoImpl();
 
     @Override
     public PageBean<Route> pageQuery(int cid, int currentPage, int pageSize, String rname) {
@@ -39,5 +47,22 @@ public class RouteServiceImpl implements RouteService {
         pb.setTotalPage(totalPage);
 
         return pb;
+    }
+
+    @Override
+    public Route findOne(String rid) {
+        //1.根据id去route表中查询route对象
+        Route route = routeDao.findOne(Integer.parseInt(rid));
+
+        //2.根据route的id 查询图片集合信息
+        List<RouteImg> routeImgList = routeImgDao.findByRid(route.getRid());
+        //2.2将集合设置到route对象
+        route.setRouteImgList(routeImgList);
+
+        //3.根据route的sid（商家id）查询商家对象
+        Seller seller = sellerDao.findById(route.getSid());
+        route.setSeller(seller);
+
+        return route;
     }
 }

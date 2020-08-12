@@ -20,4 +20,12 @@ public interface RouteDao {
      * @function 根据cid，start以及pageSize查询当前页的数据集合
      */
     public List<Route> findByPage(int cid, int start, int pageSize, String rname);
+
+    /**
+     * @param rid
+     * @return route
+     * @author sucre
+     * @function 根据rid查询route对象
+     */
+    public Route findOne(int rid);
 }
