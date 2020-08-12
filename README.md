@@ -21,14 +21,18 @@
 
 使用sql脚本完成数据库表的建立
 
++ tab_user：用户信息表
++ tab_category：分类条目表
++ tab_route：旅游线路表
+
 ![image-20200805150212235](D:\Java\workplace\JavaProject\README.assets\image-20200805150212235.png)
 
 ## 主要实体类结构
 
-|                            User类                            |                         ResultInfo类                         |      |      |      |      |      |
-| :----------------------------------------------------------: | :----------------------------------------------------------: | :--: | :--: | :--: | :--- | :--- |
-| private int uid;//用户id<br/>    private String username;//用户名，账号<br/>    private String password;//密码<br/>    private String name;//真实姓名<br/>    private String birthday;//出生日期<br/>    private String sex;//男或女<br/>    private String telephone;//手机号<br/>    private String email;//邮箱<br/>    private String status;//激活状态，Y代表激活，N代表未激活<br/>    private String code;//激活码（要求唯一） | private boolean flag;//后端返回结果正常为true，发生异常返回false<br/>    private Object data;//后端返回结果数据对象<br/>    private String errorMsg;//发生异常的错误消息 |      |      |      |      |      |
-|                                                              |                                                              |      |      |      |      |      |
+|                            User类                            |                         ResultInfo类                         |                          Category类                          |                          PageBean类                          |                           Route类                            |      |      |
+| :----------------------------------------------------------: | :----------------------------------------------------------: | :----------------------------------------------------------: | :----------------------------------------------------------: | :----------------------------------------------------------: | :--- | :--- |
+| private int uid;//用户id<br/>    private String username;//用户名，账号<br/>    private String password;//密码<br/>    private String name;//真实姓名<br/>    private String birthday;//出生日期<br/>    private String sex;//男或女<br/>    private String telephone;//手机号<br/>    private String email;//邮箱<br/>    private String status;//激活状态，Y代表激活，N代表未激活<br/>    private String code;//激活码（要求唯一） | private boolean flag;//后端返回结果正常为true，发生异常返回false<br/>    private Object data;//后端返回结果数据对象<br/>    private String errorMsg;//发生异常的错误消息 | private int cid;//分类id<br /> private String cname;//分类名称 | private int totalCount; //总记录数<br /> private int totalPage;  //总页数 <br />private int currentPage;//当前页码<br /> private int pageSize;//每页显示的条数 <br />private List<T> list;//每页显示的数据集合 | private int rid;//线路id，必输<br /> private String rname;//线路名称，必输<br /> private double price;//价格，必输<br /> private String routeIntroduce;//线路介绍<br /> private String rflag;   //是否上架，必输，0代表没有上架，1代表是上架<br /> private String rdate;   //上架时间<br /> private String isThemeTour;//是否主题旅游，必输，0代表不是，1代表是<br /> private int count;//收藏数量<br /> private int cid;//所属分类，必输<br /> private String rimage;//缩略图<br /> private int sid;//所属商家<br /> private String sourceId;//抓取数据的来源id<br />  private Category category;//所属分类<br /> private Seller seller;//所属商家<br /> private List<RouteImg> routeImgList;//商品详情图片列表 |      |      |
+|                                                              |                                                              |                                                              |                                                              |                                                              |      |      |
 
 
 
@@ -170,5 +174,101 @@ public class UserServlet extends BaseServlet {
 
 
 
+## 分类显示模块
 
+### 页面顶端分类栏显示
+
+在页面加载完成时，顶端显示分类栏，包括：首页，门票，酒店，香港车票，出境游，国内游，港澳游，抱团定制，全球自由行，收藏排行榜。
+
+|   架构   |                             前端                             |                          Servlet层                           |         Service层          |                     Dao层                     |
+| :------: | :----------------------------------------------------------: | :----------------------------------------------------------: | :------------------------: | :-------------------------------------------: |
+|   文件   |                         header.html                          |                       CategoryServlet                        |      CategoryService       |                  CategoryDao                  |
+| 功能说明 | 在页面加载完成后，提交ajax请求，获取所有的分类，并显示在页面上方<br /> | findAll()调用service查询所有的分类条目，并将结果通过json写回客户端。 | findAll()调用dao层进行查询 | findAll()查询tab_category表中的所有数据并返回 |
+
+#### :star: 优化
+
+分析发现，分类的数据在每一次页面加载后都会重新请求数据库来加载，对数据库的压力比较大，而且分类的数据不会经常产生变化，所有可以使用**redis**来缓存这个数据。
+
+**方法**：在service中查询时首先到redis中查询，如果查询结果为空，说明是第一次访问，将查询数据存入redis中；如果不为空，则表示不是第一次访问。最后返回查询结果集合即可。
+
+修改`CategoryServiceImpl`中的findAll()方法：
+
+```java
+public List<Category> findAll() {
+        //1.获取Jedis客户端
+        Jedis jedis = JedisUtil.getJedis();
+        //2.使用sortedset作为数据结构，key为category，0到-1表示所有
+        Set<Tuple> redisCategories = jedis.zrangeWithScores("category", 0, -1);
+        
+        List<Category> categories = null;
+
+        //3.判断redis缓存中的集合是否为空
+        if (redisCategories == null || redisCategories.size() == 0) {
+            //如果缓存中为空，从数据库中查询，并将结果写入缓存
+            categories = categoryDao.findAll();
+            for (int i = 0; i < categories.size(); i++) {
+                jedis.zadd("category", categories.get(i).getCid(), categories.get(i).getCname());
+            }
+        } else {
+            //4.如果不为空,将set的数据存入list
+            categories = new ArrayList<Category>();
+            for (Tuple tuple : redisCategories
+            ) {
+                Category category = new Category();
+                category.setCname(tuple.getElement());
+                category.setCid((int) tuple.getScore());
+                categories.add(category);
+            }
+        }
+        return categories;
+}
+```
+
+### 分类内容的分页展示
+
+点击不同的分类条目，进入具体类别的内容展示页面，进行分页显示。
+
+#### 分类条目cid的传递
+
+在查询分类对象category时，保存其中的cid属性值，用于传递给前端页面，使前端页面在点击相应分类条目时能够根据id进行跳转。
+
+1. 在header.html页面中，对于每一个分类条目，传递cid的值
+
+   ```js
+   $.get("Category/findAll", {}, function (data) {
+       var lis = '<li class="nav-active"><a href="index.html">首页</a></li>';
+       for (var i = 0; i < data.length; i++) {
+           var li = '<li><a href="route_list.html?cid= ' + data[i].cid + '">' + data[i].cname + '</a></li>';
+           lis += li;
+       }
+       lis += '<li><a href="favoriterank.html">收藏排行榜</a></li>';
+       $("#category").html(lis);
+   });
+   ```
+
+2. 在route_list.html中获取点击的分类条目的cid的值，`location.search`方法会返回返回当前 URL 的查询部分，即问号 ? 之后的内容，在此处为`?cid=xx`
+
+   ```js
+   $(function () {
+       var search = location.search;
+       // 切割字符串，拿到第二个值
+       var cid = search.split("=")[1];
+   });
+   ```
+
+#### 分页展示功能
+
+|   架构   |                             前端                             |                           服务器端                           |                          Service层                           |                            Dao层                             |
+| :------: | :----------------------------------------------------------: | :----------------------------------------------------------: | :----------------------------------------------------------: | :----------------------------------------------------------: |
+|   文件   |                       route_list.html                        |                         RouteServlet                         |                         RouteService                         |                           RouteDao                           |
+| 功能说明 | 1. 客户端页面发送ajax请求用于请求Pagebean对象数据<br />2. 携带数据：currentPage当前页码，pageSize每页显示的条数，cid分页id | 1. 接受前端的参数，包括currentPage当前页码，pageSize每页显示的条数以及cid分页id；<br />2. 对于参数做合法性的验证和处理；<br />3. 调用service中的方法进行分页查询；<br />4. 查询结果为pageBean对象，将该对象通过json写回客户端。 | pageQuery()根据进行分页查询。<br />分别调用dao中的方法，查询总记录数以及当前页的数据集合，与其他数据一起封装到pageBean对象中并返回。 | findTotalCount查询总的记录数；<br />findByPage查询当前页的记录。 |
+
+
+
+### 搜索功能
+
+|   架构   |                             前端                             |                   服务器端                   |
+| :------: | :----------------------------------------------------------: | :------------------------------------------: |
+|   文件   |               route_list.html<br />header.html               | RouteServlet<br />RouteService<br />RouteDao |
+| 功能说明 | 1. 在header.html中，给搜索按钮绑定单击事件，获取当前页面的cid以及搜索框的内容rname，拼接到跳转路径中<br />2. route_list.html中的分页显示代码中加入rname条件 | 对已有的查询相关方法进行重构，添加rname参数  |
 
