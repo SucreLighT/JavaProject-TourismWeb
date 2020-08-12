@@ -1,5 +1,5 @@
 <!-- 头部 start -->
-
+<script src="js/getParameter.js"></script>
 <script>
     $(function () {
         $.get("User/findOneUser", {}, function (data) {
@@ -22,6 +22,14 @@
             $("#category").html(lis);
         });
 
+        //给搜索按钮绑定单击事件，获取搜索输入框的内容
+        $("#search-button").click(function () {
+            //线路名称
+            var rname = $("#search_input").val();
+            var cid = getParameter("cid");
+            //跳转路径 http://localhost:8080/JavaProject/route_list.html?cid=5拼接上rname=xxx
+            location.href = "http://localhost:8080/JavaProject/route_list.html?cid=" + cid + "&rname=" + rname;
+        });
     });
 </script>
 
@@ -49,8 +57,9 @@
                 <a href="/"><img src="images/logo.jpg" alt=""></a>
             </div>
             <div class="search">
-                <input name="" type="text" placeholder="请输入路线名称" class="search_input" autocomplete="off">
-                <a href="javascript:;" class="search-button">搜索</a>
+                <input name="" type="text" placeholder="请输入路线名称" class="search_input" autocomplete="off"
+                       id="search_input">
+                <a href="javascript:;" class="search-button" id="search-button">搜索</a>
             </div>
             <div class="hottel">
                 <div class="hot_pic">
