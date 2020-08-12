@@ -1,16 +1,16 @@
 package cn.sucre.domain;
 
 /**
- * @description:
+ * @description:路线对应的图片对象
  * @author: sucre
  * @date: 2020/08/02
  * @time: 15:53
  */
 public class RouteImg {
-    private int rgid;//商品图片id
-    private int rid;//旅游商品id
-    private String bigPic;//详情商品大图
-    private String smallPic;//详情商品小图
+    private int rgid;
+    private int rid;
+    private String bigPic;
+    private String smallPic;
 
     /**
      * 无参构造方法

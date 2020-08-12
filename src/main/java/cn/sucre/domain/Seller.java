@@ -7,10 +7,10 @@ package cn.sucre.domain;
  * @time: 15:52
  */
 public class Seller {
-    private int sid;//商家id
-    private String sname;//商家名称
-    private String consphone;//商家电话
-    private String address;//商家地址
+    private int sid;
+    private String sname;
+    private String consphone;
+    private String address;
 
     /**
      * 无参构造方法
