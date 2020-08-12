@@ -25,7 +25,7 @@
 + tab_category：分类条目表
 + tab_route：旅游线路表
 
-![image-20200805150212235](README.assets/image-20200805150212235.png)
+![image-20200805150212235](https://github.com/tangtangsama/JavaProject/blob/master/README.assets/image-20200805150212235.png)
 
 ## 主要实体类结构
 
@@ -80,7 +80,7 @@
 
 在开发过程中，完成一个模块时，如用户模块，会产生多个Servlet（注册，登录，登出等），为了减少Servlet文件的数量，将多个Servlet中的功能全部抽象为对应的方法，集合到一个Servlet中。
 
-![image-20200806163354404](README.assets/image-20200806163354404.png)
+![image-20200806163354404](https://github.com/tangtangsama/JavaProject/blob/master/README.assets/image-20200806163354404.png)
 
 如图所示：BaseServlet用于实现方法的分发，关于用户的操作，将方法全部写在UserServlet中。
 
