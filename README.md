@@ -25,14 +25,13 @@
 + tab_category：分类条目表
 + tab_route：旅游线路表
 
-![image-20200805150212235](D:\Java\workplace\JavaProject\README.assets\image-20200805150212235.png)
+![image-20200805150212235](README.assets\image-20200805150212235.png)
 
 ## 主要实体类结构
 
-|                            User类                            |                         ResultInfo类                         |                          Category类                          |                          PageBean类                          |                           Route类                            |      |      |
-| :----------------------------------------------------------: | :----------------------------------------------------------: | :----------------------------------------------------------: | :----------------------------------------------------------: | :----------------------------------------------------------: | :--- | :--- |
-| private int uid;//用户id<br/>    private String username;//用户名，账号<br/>    private String password;//密码<br/>    private String name;//真实姓名<br/>    private String birthday;//出生日期<br/>    private String sex;//男或女<br/>    private String telephone;//手机号<br/>    private String email;//邮箱<br/>    private String status;//激活状态，Y代表激活，N代表未激活<br/>    private String code;//激活码（要求唯一） | private boolean flag;//后端返回结果正常为true，发生异常返回false<br/>    private Object data;//后端返回结果数据对象<br/>    private String errorMsg;//发生异常的错误消息 | private int cid;//分类id<br /> private String cname;//分类名称 | private int totalCount; //总记录数<br /> private int totalPage;  //总页数 <br />private int currentPage;//当前页码<br /> private int pageSize;//每页显示的条数 <br />private List<T> list;//每页显示的数据集合 | private int rid;//线路id，必输<br /> private String rname;//线路名称，必输<br /> private double price;//价格，必输<br /> private String routeIntroduce;//线路介绍<br /> private String rflag;   //是否上架，必输，0代表没有上架，1代表是上架<br /> private String rdate;   //上架时间<br /> private String isThemeTour;//是否主题旅游，必输，0代表不是，1代表是<br /> private int count;//收藏数量<br /> private int cid;//所属分类，必输<br /> private String rimage;//缩略图<br /> private int sid;//所属商家<br /> private String sourceId;//抓取数据的来源id<br />  private Category category;//所属分类<br /> private Seller seller;//所属商家<br /> private List<RouteImg> routeImgList;//商品详情图片列表 |      |      |
-|                                                              |                                                              |                                                              |                                                              |                                                              |      |      |
+|                            User类                            |                         ResultInfo类                         |                          Category类                          |                          PageBean类                          |                           Route类                            |                          RouteImg类                          |                           Seller类                           |      |
+| :----------------------------------------------------------: | :----------------------------------------------------------: | :----------------------------------------------------------: | :----------------------------------------------------------: | :----------------------------------------------------------: | :----------------------------------------------------------: | :----------------------------------------------------------: | ---- |
+| private int uid;//用户id<br/>    private String username;//用户名，账号<br/>    private String password;//密码<br/>    private String name;//真实姓名<br/>    private String birthday;//出生日期<br/>    private String sex;//男或女<br/>    private String telephone;//手机号<br/>    private String email;//邮箱<br/>    private String status;//激活状态，Y代表激活，N代表未激活<br/>    private String code;//激活码（要求唯一） | private boolean flag;//后端返回结果正常为true，发生异常返回false<br/>    private Object data;//后端返回结果数据对象<br/>    private String errorMsg;//发生异常的错误消息 | private int cid;//分类id<br /> private String cname;//分类名称 | private int totalCount; //总记录数<br /> private int totalPage;  //总页数 <br />private int currentPage;//当前页码<br /> private int pageSize;//每页显示的条数 <br />private List<T> list;//每页显示的数据集合 | private int rid;//线路id，必输<br /> private String rname;//线路名称，必输<br /> private double price;//价格，必输<br /> private String routeIntroduce;//线路介绍<br /> private String rflag;   //是否上架，必输，0代表没有上架，1代表是上架<br /> private String rdate;   //上架时间<br /> private String isThemeTour;//是否主题旅游，必输，0代表不是，1代表是<br /> private int count;//收藏数量<br /> private int cid;//所属分类，必输<br /> private String rimage;//缩略图<br /> private int sid;//所属商家<br /> private String sourceId;//抓取数据的来源id<br />  private Category category;//所属分类<br /> private Seller seller;//所属商家<br /> private List<RouteImg> routeImgList;//商品详情图片列表 | private int rgid;//商品图片<br />id private int rid;//旅游商品<br />id private String bigPic;//详情商品大图<br /> private String smallPic;//详情商品小图 | private int sid;//商家<br />id private String sname;//商家名称<br /> private String consphone;//商家电话<br /> private String address;//商家地址 |      |
 
 
 
@@ -81,7 +80,7 @@
 
 在开发过程中，完成一个模块时，如用户模块，会产生多个Servlet（注册，登录，登出等），为了减少Servlet文件的数量，将多个Servlet中的功能全部抽象为对应的方法，集合到一个Servlet中。
 
-![image-20200806163354404](D:\Java\workplace\JavaProject\README.assets\image-20200806163354404.png)
+![image-20200806163354404](README.assets\image-20200806163354404.png)
 
 如图所示：BaseServlet用于实现方法的分发，关于用户的操作，将方法全部写在UserServlet中。
 
@@ -265,10 +264,32 @@ public List<Category> findAll() {
 
 
 
-### 搜索功能
+## 搜索功能
 
 |   架构   |                             前端                             |                   服务器端                   |
 | :------: | :----------------------------------------------------------: | :------------------------------------------: |
 |   文件   |               route_list.html<br />header.html               | RouteServlet<br />RouteService<br />RouteDao |
 | 功能说明 | 1. 在header.html中，给搜索按钮绑定单击事件，获取当前页面的cid以及搜索框的内容rname，拼接到跳转路径中<br />2. route_list.html中的分页显示代码中加入rname条件 | 对已有的查询相关方法进行重构，添加rname参数  |
+
+
+
+## 商品详情页面
+
+|   架构   |                             前端                             |                           服务器端                           |                          Service层                           |                  Dao层                   |
+| :------: | :----------------------------------------------------------: | :----------------------------------------------------------: | :----------------------------------------------------------: | :--------------------------------------: |
+|   文件   |            route_list.html<br />route_detail.html            |                         RouteServlet                         |                         RouteService                         | RouteDao<br />RouteImgDao<br />SellerDao |
+| 功能说明 | 1. route_list.html中点击单个商品详情时执行跳转，跳转路径为：route_detail.html?rid=xxx<br />2. route_detail.html中当页面加载成功时发送ajax请求，根据rid查询对应的route对象 | findOne()方法：<br />1. 接受客户端的数据rid<br />2. 根据rid调用service查询对应的route对象<br />3. 将查询结果通过json写回客户端 | findOne()方法：<br />1. 根据rid调用RouteDao查询route对象<br />2. 根据rid调用RouteImgDao查询tab_route_img表，将结果集合写入到route对象中<br />3. 根据sid查询tab_seller查询卖家信息，将结果集合写入到route对象中 |   实现具体的查询方法去对应表中查询数据   |
+
+
+
+
+
+
+
+
+
+
+
+
+
 
