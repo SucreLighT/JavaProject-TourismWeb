@@ -1,8 +1,10 @@
 package cn.sucre.service.impl;
 
+import cn.sucre.dao.FavoriteDao;
 import cn.sucre.dao.RouteDao;
 import cn.sucre.dao.RouteImgDao;
 import cn.sucre.dao.SellerDao;
+import cn.sucre.dao.impl.FavoriteDaoImpl;
 import cn.sucre.dao.impl.RouteDaoImpl;
 import cn.sucre.dao.impl.RouteImgDaoImpl;
 import cn.sucre.dao.impl.SellerDaoImpl;
@@ -24,6 +26,7 @@ public class RouteServiceImpl implements RouteService {
     private RouteDao routeDao = new RouteDaoImpl();
     private RouteImgDao routeImgDao = new RouteImgDaoImpl();
     private SellerDao sellerDao = new SellerDaoImpl();
+    private FavoriteDao favoriteDao = new FavoriteDaoImpl();
 
     @Override
     public PageBean<Route> pageQuery(int cid, int currentPage, int pageSize, String rname) {
@@ -63,6 +66,11 @@ public class RouteServiceImpl implements RouteService {
         Seller seller = sellerDao.findById(route.getSid());
         route.setSeller(seller);
 
+        //4. 查询收藏次数
+        int count = favoriteDao.findCountByRid(route.getRid());
+        route.setCount(count);
+
         return route;
     }
+
 }

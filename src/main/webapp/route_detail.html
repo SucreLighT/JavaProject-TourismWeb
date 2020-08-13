@@ -83,10 +83,11 @@
                     <div class="pros_price">
                         <p class="price"><strong id="price">¥2699.00</strong><span>起</span></p>
                         <p class="collect">
-                            <a class="btn"><i class="glyphicon glyphicon-heart-empty"></i>点击收藏</a>
+                            <a class="btn" id="favorite" onclick="addFavorite();"><i
+                                    class="glyphicon glyphicon-heart-empty"></i>点击收藏</a>
 
-                            <a class="btn already" disabled="disabled"><i class="glyphicon glyphicon-heart-empty"></i>点击收藏</a>
-                            <span>已收藏100次</span>
+                            <!--                            <a class="btn already" disabled="disabled"><i class="glyphicon glyphicon-heart-empty"></i>点击收藏</a>-->
+                            <span id="favoriteCount">已收藏100次</span>
                         </p>
                     </div>
                 </div>
@@ -206,6 +207,7 @@
                     $("#sname").html(route.seller.sname);
                     $("#consphone").html(route.seller.consphone);
                     $("#address").html(route.seller.address);
+                    $("#favoriteCount").html("已收藏" + route.count + "次");
 
                     //图片展示
                     var ddstr = '<a class="up_img up_img_disable"></a>';
@@ -232,6 +234,45 @@
                 });
             });
 
+
+            $(function () {
+                // 发送请求，判断用户是否收藏过该线路
+                var rid = getParameter("rid");
+                $.get("Route/isFavorite", {rid: rid}, function (flag) {
+                    if (flag) {
+                        // 用户已经收藏过
+                        //<a  class="btn already" disabled="disabled">
+                        //设置收藏按钮的样式
+                        $("#favorite").addClass("already");
+                        $("#favorite").attr("disabled", "disabled");
+
+                        //删除按钮的点击事件
+                        $("#favorite").removeAttr("onclick");
+                    } else {
+                        // 用户没有收藏
+                    }
+                });
+            });
+
+            function addFavorite() {
+                var rid = getParameter("rid");
+                //1. 判断用户是否登录
+                $.get("User/findOneUser", {}, function (user) {
+                    if (user) {
+                        //用户登录了
+                        //添加功能
+                        $.get("Route/addFavorite", {rid: rid}, function () {
+                            //代码刷新页面
+                            location.reload();
+                        });
+
+                    } else {
+                        //用户没有登录
+                        alert("您尚未登录，请登录");
+                        location.href = "http://localhost:8080/JavaProject/login.html";
+                    }
+                })
+            }
         </script>
 
 
