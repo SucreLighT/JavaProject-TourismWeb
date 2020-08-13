@@ -7,9 +7,9 @@ package cn.sucre.domain;
  * @time: 15:51
  */
 public class Favorite {
-    private Route route;//旅游线路对象
-    private String date;//收藏时间
-    private User user;//所属用户
+    private Route route;
+    private String date;
+    private User user;
 
     /**
      * 无参构造方法
